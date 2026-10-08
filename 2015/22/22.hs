@@ -156,12 +156,11 @@ main = do
   input <- readFile fn
   let
     initialGame = parseBoss input
-    partOne = case solveDijkstra initialGame False of
+    part p2 = case solveDijkstra initialGame p2 of
       Just mn -> show mn
       _ -> show "failed to find solution"
-    partTwo = case solveDijkstra initialGame True of
-      Just mn -> show mn
-      _ -> show "failed to find solution"
+    partOne = part False
+    partTwo = part True
 
   putStrLn $ ("Part One: " ++) partOne
   putStrLn $ ("Part Two: " ++) partTwo
