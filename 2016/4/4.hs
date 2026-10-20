@@ -1,6 +1,6 @@
 import System.IO
 import System.Environment
-import Data.Char (isDigit)
+import Data.Char (isDigit, ord, chr)
 import Data.List (sort, group, sortOn, elemIndex, isInfixOf)
 
 parseRoom :: String -> (String, Int, String)
@@ -19,18 +19,12 @@ validateRoom (name, _, csum) = actualCsum == csum
     grouped = group $ sort name
     flattened = zip (map head grouped) (map length grouped)
     sorted = sortOn (\(a, b) -> (negate b, a)) flattened
-    actualCsum = map (\(a, b) -> a) $ take 5 sorted
-
+    actualCsum = map fst $ take 5 sorted
 
 decypherRoom :: (String, Int, String) -> (String, Int)
-decypherRoom (cypher, n, _) = (map go cypher, n)
+decypherRoom (cypher, n, _) = (map (go n) cypher, n)
   where
-    alphabet = "abcdefghijklmnopqrstuvwxyz"
-    m = n `mod` length alphabet
-    infAlphabet = cycle alphabet
-    go c = case elemIndex c infAlphabet of
-             Just v -> infAlphabet !! (v + m)
-             _ -> error "Error!"
+    go n c = chr $ (ord 'a') + (ord c - (ord 'a') + n) `mod` length ['a' .. 'z']
 
 main :: IO ()
 main = do
@@ -42,9 +36,9 @@ main = do
     rooms = lines input
     parsedRooms = map parseRoom rooms
     validRooms = filter (validateRoom) parsedRooms
-    partOne = foldr (\(_, id, _) s -> s + id) 0 validRooms
+    partOne = sum $ map (\(_, id, _) -> id) validRooms
     decypheredRooms = map decypherRoom validRooms
-    partTwo = filter (\(nm, _) -> "northpoleobjects" `isInfixOf` nm) decypheredRooms
+    partTwo = snd $ head $ filter (\(nm, _) -> "northpoleobjects" `isInfixOf` nm) decypheredRooms
 
   putStrLn $ ("Part One: " ++) $ show partOne
   putStrLn $ ("Part Two: " ++) $ show partTwo
